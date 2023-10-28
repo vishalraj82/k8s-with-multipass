@@ -123,7 +123,7 @@ write_files:
         net.ipv6.conf.all.forwarding=1
         net.bridge.bridge-nf-call-iptables  = 1
         net.bridge.bridge-nf-call-ip6tables = 1
-    - path: /tmp/kubeadm-config.yaml
+    - path: /etc/kubernetes/manifests/kubeadm-config.yaml
       content: |
         kind: ClusterConfiguration
         apiVersion: kubeadm.k8s.io/v1beta3
@@ -132,13 +132,18 @@ write_files:
         kind: KubeletConfiguration
         apiVersion: kubelet.config.k8s.io/v1beta1
         cgroupDriver: systemd
+bootcmd:
+    - sed -i "s/GRUB_CMDLINE_LINUX_DEFAULT=\"/GRUB_CMDLINE_LINUX_DEFAULT=\"ipv6.disable=1 /g" /etc/default/grub
+    - sudo update-grub
 runcmd:
     - modprobe overlay
     - modprobe br_netfilter
     - sysctl --system
-    - mkdir /etc/containerd
-    - containerd config default | tee /etc/containerd/config.toml
-    - sed -i 's/SystemdCgroup \= false/SystemdCgroup \= true/g' /etc/containerd/config.toml
-    - systemctl daemon-reload
+#   - mkdir /etc/containerd
+#   - containerd config default | tee /etc/containerd/config.toml
+#   - sed -i 's/SystemdCgroup \= false/SystemdCgroup \= true/g' /etc/containerd/config.toml
+#   - systemctl daemon-reload
+    - rm -f /etc/containerd/config.toml
+    - service containerd restart
     - systemctl enable --now containerd
-    - kubeadm init --config /tmp/kubeadm-config.yaml
+    - kubeadm init --config /etc/kubernetes/manifests/kubeadm-config.yaml
