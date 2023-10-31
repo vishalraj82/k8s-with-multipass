@@ -3,6 +3,7 @@ package_upgrade: true
 packages:
     - gpg
     - curl
+    - net-tools
     - ca-certificates
     - apt-transport-https
     - kubeadm
@@ -123,7 +124,8 @@ write_files:
         net.ipv6.conf.all.forwarding=1
         net.bridge.bridge-nf-call-iptables  = 1
         net.bridge.bridge-nf-call-ip6tables = 1
-    - path: /etc/kubernetes/manifests/kubeadm-config.yaml
+        net/bridge/bridge-nf-call-arptables = 1
+    - path: /etc/kubernetes/kubeadm-config.yml
       content: |
         kind: ClusterConfiguration
         apiVersion: kubeadm.k8s.io/v1beta3
@@ -136,14 +138,14 @@ bootcmd:
     - sed -i "s/GRUB_CMDLINE_LINUX_DEFAULT=\"/GRUB_CMDLINE_LINUX_DEFAULT=\"ipv6.disable=1 /g" /etc/default/grub
     - sudo update-grub
 runcmd:
+    - swapoff -a
     - modprobe overlay
     - modprobe br_netfilter
     - sysctl --system
-#   - mkdir /etc/containerd
-#   - containerd config default | tee /etc/containerd/config.toml
-#   - sed -i 's/SystemdCgroup \= false/SystemdCgroup \= true/g' /etc/containerd/config.toml
-#   - systemctl daemon-reload
     - rm -f /etc/containerd/config.toml
     - service containerd restart
     - systemctl enable --now containerd
-    - kubeadm init --config /etc/kubernetes/manifests/kubeadm-config.yaml
+
+#   - kubeadm config images pull
+#   - kubeadm init
+#   - kubectl apply -f https://github.com/weaveworks/weave/releases/download/v2.8.1/weave-daemonset-k8s.yaml
