@@ -9,6 +9,7 @@ packages:
     - kubeadm
     - kubectl
     - kubelet
+    - kubernetes-cni
     - containerd.io
 apt:
     sources:
@@ -164,6 +165,7 @@ runcmd:
         # apt cleanup
         apt-get autoclean -y
         apt-get autoremove -y
+    - iptable -P FORWARD ACCEPT
 
 
 #   - kubeadm config images pull
