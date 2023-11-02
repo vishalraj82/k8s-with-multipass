@@ -127,14 +127,6 @@ write_files:
         net.bridge.bridge-nf-call-ip6tables = 1
         net/bridge/bridge-nf-call-arptables = 1
     - path: /etc/kubernetes/kubeadm-config.yml
-      content: |
-        kind: ClusterConfiguration
-        apiVersion: kubeadm.k8s.io/v1beta3
-        kubernetesVersion: v1.28.0
-        ---
-        kind: KubeletConfiguration
-        apiVersion: kubelet.config.k8s.io/v1beta1
-        cgroupDriver: systemd
 bootcmd:
     - sed -i "s/GRUB_CMDLINE_LINUX_DEFAULT=\"/GRUB_CMDLINE_LINUX_DEFAULT=\"ipv6.disable=1 /g" /etc/default/grub
     - sudo update-grub
@@ -166,6 +158,9 @@ runcmd:
         apt-get autoclean -y
         apt-get autoremove -y
     - iptable -P FORWARD ACCEPT
+    - |
+        IPADDR=$(ifconfig | grep enp[0-9]s[0-9] -A 1 | awk '/inet / { print $2 }')
+        echo  KUBELET_EXTRA_ARGS=--node-ip=$IPADDR | tee /etc/default/kubectl
 
 
 #   - kubeadm config images pull
