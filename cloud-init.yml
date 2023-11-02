@@ -13,7 +13,7 @@ packages:
 apt:
     sources:
         docker.list:
-            source: "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"
+            source: "deb [arch=amd64] https://download.docker.com/linux/ubuntu $RELEASE stable"
             key: |
                 -----BEGIN PGP PUBLIC KEY BLOCK-----
 
@@ -138,13 +138,33 @@ bootcmd:
     - sed -i "s/GRUB_CMDLINE_LINUX_DEFAULT=\"/GRUB_CMDLINE_LINUX_DEFAULT=\"ipv6.disable=1 /g" /etc/default/grub
     - sudo update-grub
 runcmd:
-    - swapoff -a
-    - modprobe overlay
-    - modprobe br_netfilter
-    - sysctl --system
-    - rm -f /etc/containerd/config.toml
-    - service containerd restart
-    - systemctl enable --now containerd
+    - |
+        # switch off swap
+        sysctl vm.swappiness=0
+        echo "vm.swappiness=0" | tee -a /etc/sysctl.conf
+        sysctl --system
+    - |
+        # enable containerd on restart
+        systemctl enable --now containerd
+        rm -f /etc/containerd/config.toml
+    - |
+        # disable unnecessary services
+        systemctl disable apport.service apport-autoreport.service          --now
+        systemctl disable man-db.service            man-db.timer            --now
+        systemctl disable apt-dialy.service         apt-daily.timer         --now
+        systemctl disable apt-daily-upgrade.service apt-daily-upgrade.timer --now
+        systemctl disable motd-new.service          motd-new.timer          --now
+        systemctl disable ua-messaging.service      ua-messaging.timer      --now
+        systemctl disable unattended-upgrade.service --now
+        systemctl disable bluetooth.target --now
+    - |
+        modprobe overlay
+        modprobe br_netfilter
+    - |
+        # apt cleanup
+        apt-get autoclean -y
+        apt-get autoremove -y
+
 
 #   - kubeadm config images pull
 #   - kubeadm init
