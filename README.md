@@ -55,50 +55,10 @@ multipass launch --name master --cpus 2 --memory 2G --disk 10G jammy
 multipass launch --name worker1 --cpus2 --memory 2G --disk 10G jammy
 ```
 
-Once both the nodes are ready, we'll first login to the `master` node to initialize it as master node. Post the initialization, we will also configure the non-root user (`ubuntu` in our case) to use the cluster, followed by the netwoking setup for the cluster.
+Once both the nodes are ready, we'll first proceed to have the master node ready. In order to gain shell access to mater node, one of the below command would work. In the home directory of the user `ubuntu`, a script with name `kubeadm-init` is available.
 
 ```bash
-mp shell master
-sudo kubeadm config images pull
-sudo kubeadm init --config /etc/kubernetes/kubeadm-config.yml
-```
+multipass shell master
 
-Once the initializeation is done, the networking must be configured for the cluster
-
-```bash
-mkdir $HOME/.kube
-
-sudo cp /etc/kubernetes/admin.conf
-
-sudo chown $(id -u):$(id -g) $HOME/.kube/config
-
-kubectl apply -f https://raw.githubusercontent.com/thxCode/coreos-flannel/master/Documentation/kube-flannel.yml
-
-sudo kubeadm token create --print-join-command
-```
-
-The last comand woud print a token which can then be used by all the worker nodes to join the cluster. Now let move to the worker nodes.
-
-```bash
-multipass shell worker1
-```
-
-Copy the token command generated on the master node and paste it into the worker node terminal
-
-```bash
-sudo kubeadm join <master-node-ip>:6443 --token <token> --discovery-token-ca-cert-hash sha256:<discovery-token-ca-cert-hash>
-```
-
-Once all the worker nodes joins the cluster, switch back to the master node terminal to confirm
-
-```bash
-kubectl get nodes
-```
-
-Next we will set up the networking configuration. For our case, we'll use the Weave networking. On the master node
-
-```bash
-kubectl apply -f https://github.com/weaveworks/weave/releases/download/v2.8.1/weave-daemonset-k8s.yaml
-
-kubectl get nodes
+multipass exec master /bin/bash
 ```
