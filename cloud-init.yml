@@ -110,19 +110,6 @@ write_files:
         net.bridge.bridge-nf-call-iptables  = 1
         net.bridge.bridge-nf-call-ip6tables = 1
         net/bridge/bridge-nf-call-arptables = 1
-    - path: /home/ubuntu/kubeadm-init
-      owner: ubuntu:ubuntu
-      permissions: "0755"
-      content: |
-        MASTER_PRIVATE_IP=$(ip addr show ens3 | awk '/inet / {print $2}' | cut -d/ -f1)
-        NODENAME=$(hostname -s)
-        POD_CIDR="192.168.0.0/16"
-        sudo kubeadm init \
-            --apiserver-advertise-address="$MASTER_PRIVATE_IP" \
-            --apiserver-cert-extra-sans="$MASTER_PRIVATE_IP" \
-            --pod-network-cidr="$POD_CIDR" \
-            --node-name "$NODENAME" \
-            --ignore-preflight-errors Swap
 runcmd:
     - |
         # switch off swap

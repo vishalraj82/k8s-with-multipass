@@ -62,3 +62,15 @@ multipass shell master
 
 multipass exec master /bin/bash
 ```
+
+```bash
+MASTER_PRIVATE_IP=$(ip addr show <network-interface> | awk '/inet / {print $2}' | cut -d/ -f1)
+NODENAME=$(hostname -s)
+POD_CIDR="192.168.0.0/16"
+sudo kubeadm init \
+    --apiserver-advertise-address="$MASTER_PRIVATE_IP" \
+    --apiserver-cert-extra-sans="$MASTER_PRIVATE_IP" \
+    --pod-network-cidr="$POD_CIDR" \
+    --node-name "$NODENAME" \
+    --ignore-preflight-errors Swap
+```
