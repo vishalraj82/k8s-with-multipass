@@ -155,8 +155,10 @@ runcmd:
     - |
         IPADDR=$(ifconfig | grep enp[0-9]s[0-9] -A 1 | awk '/inet / { print $2 }')
         echo  KUBELET_EXTRA_ARGS=--node-ip=$IPADDR | tee /etc/default/kubectl
+    - kubeadm config images pull
     - |
         echo "alias k=kubectl" | tee /home/ubuntu/.bash_aliases
+        chown -R ubuntu:ubuntu /home/ubuntu
 
 #   - kubectl apply -f https://github.com/weaveworks/weave/releases/download/v2.8.1/weave-daemonset-k8s.yaml
 #   - kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
