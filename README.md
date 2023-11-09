@@ -83,6 +83,8 @@ ifconfig
 From the abve commandy it can be found out what network interface the master node has and its corresponding assigned IP. Finally, we'll use the calico networking plugin.
 
 ```bash
+sudo kubeadm config images pull
+
 MASTER_PRIVATE_IP=$(ip addr show <network-interface> | awk '/inet / {print $2}' | cut -d/ -f1)
 NODENAME=$(hostname -s)
 POD_CIDR="172.16.0.0/16"
@@ -120,21 +122,26 @@ Login to the shell for master node and create two files
 # nginx-deployment.yml
 apiVersion: apps/v1
 kind: Deployment
-metatata:
+metadata:
   name: nginx-deployment
   namespace: default
-template:
+spec:
   replicas: 2
   selector:
     matchLabels:
       app: nginx
-  spec:
-    containers:
-      - name: nginx-pod
-        image: nginx:alpine
-        ports:
-          - containerPort: 80
-            name: nginx-pod-port
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+        - name: nginx-pod
+          image: nginx:alpine
+          ports:
+            - containerPort: 80
+              name: nginx-pod-port
+
 ```
 
 ```bash
