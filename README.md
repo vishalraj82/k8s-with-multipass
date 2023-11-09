@@ -50,11 +50,11 @@ multipass find
 Lets get started with launching the cluster nodes. First we'll begin with the `master` node and then 2 worker nodes. We need to wait a couple of minute after the prompt returns from the launch as initialization can take sometime. The multipass prompt waits for a defautl time of __300__ seconds. This can be changed by specifying the parameter `--timeout <timeout>` during the launch operation.
 
 ```bash
-multipass launch --name master --cpus 2 --memory 4G --disk 10G --cloud-init cloud-init.yml jammy
+multipass launch --name master --cpus 2 --memory 4G --disk 10G --cloud-init crio-init.yml jammy
 
-multipass launch --name node1 --cpus 2 --memory 2G --disk 10G --cloud-init cloud-init.yml  jammy
+multipass launch --name node1 --cpus 2 --memory 2G --disk 10G --cloud-init crio-init.yml  jammy
 
-multipass launch --name node2 --cpus 2 --memory 2G --disk 10G --cloud-init cloud-init.yml  jammy
+multipass launch --name node2 --cpus 2 --memory 2G --disk 10G --cloud-init crio-init.yml  jammy
 ```
 
 Once all the nodes are launched, we'll restart the nodes. The command `multipass restart` can take a list of nodes to restart of the flag `--all` to restart all running nodes
