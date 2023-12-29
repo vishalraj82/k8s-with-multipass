@@ -36,7 +36,7 @@ For Linux based host machine, multipass can use LXD or QEMU as the driver. For W
 
 ```
 multipass set local.driver=lxd
-multipass get local.drier
+multipass get local.driver
 ```
 
 For our purpose, we're going to use __Ubuntu Jammy__ (LTS). In order to see the list of OS images supported by multipass
